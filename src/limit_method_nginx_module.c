@@ -2,9 +2,9 @@
 #include <ngx_core.h>
 #include <ngx_http.h>
 #include <stddef.h>
-#include <sys/types.h>
 #include "limit_method_nginx_module.h"
 
+typedef unsigned char u_char;
 
 typedef struct {
   ngx_str_t  fallback;
@@ -66,11 +66,11 @@ ngx_http_limit_method_handler(ngx_http_request_t *r)
     ngx_http_limit_method_loc_conf_t  *lmcf;
     lmcf = ngx_http_get_module_loc_conf(r, ngx_http_limit_method_module);
 
-    ngx_str_t name;
+    if (lmcf->fallback.len <= 1) {
+        return NGX_DECLINED;
+    }
 
-    ngx_str_set(&name, lmcf->fallback.data);
-
-    ngx_int_t result = ngx_http_named_location(r, &name);
+    ngx_int_t result = ngx_http_named_location(r, &lmcf->fallback);
 
     ngx_http_finalize_request (r, NGX_DONE);
 
@@ -118,7 +118,7 @@ ngx_http_limit_method_init(ngx_conf_t *cf)
 
     cmcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_core_module);
 
-    h = ngx_array_push(&cmcf->phases[NGX_HTTP_PRECONTENT_PHASE].handlers);
+    h = ngx_array_push(&cmcf->phases[NGX_HTTP_ACCESS_PHASE].handlers);
     if (h == NULL) {
         return NGX_ERROR;
     }

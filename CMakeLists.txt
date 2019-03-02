@@ -6,6 +6,7 @@ set(CMAKE_C_STANDARD 99)
 include_directories(
     ${PROJECT_SOURCE_DIR}/../nginx/src/core
     ${PROJECT_SOURCE_DIR}/../nginx/src/http
+    ${PROJECT_SOURCE_DIR}/../nginx/src/os/unix
 )
 add_library(limit_method_nginx_module src/limit_method_nginx_module.c src/limit_method_nginx_module.h)
 

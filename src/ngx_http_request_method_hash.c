@@ -51,6 +51,20 @@ ngx_http_request_method_create_hash (ngx_conf_t * cf, const ngx_array_t methods)
   return method_hash;
 }
 
+extern ngx_int_t
+ngx_http_request_method_get_value (ngx_hash_t hash, ngx_str_t key_value)
+{
+  ngx_uint_t key = ngx_hash_key (key_value.data, key_value.len);
+  ngx_int_t * value = (ngx_int_t *) ngx_hash_find (&hash, key, key_value.data, key_value.len);
+
+  if (value == NULL)
+    {
+      return NGX_HTTP_UNKNOWN;
+    }
+
+  return *value;
+}
+
 static ngx_hash_keys_arrays_t *
 init_request_method_keys (ngx_conf_t * cf)
 {

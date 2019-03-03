@@ -89,11 +89,24 @@ ngx_http_limit_method_handler (ngx_http_request_t * r)
       return NGX_DECLINED;
     }
 
-  ngx_int_t result = ngx_http_named_location (r, &lmcf->fallback);
+  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                 "request method name: %s", r->method_name.data);
 
-  ngx_http_finalize_request (r, NGX_DONE);
+  ngx_int_t method = ngx_http_request_method_get_value (*lmcf->method_hash, r->method_name);
 
-  return result;
+  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                 "request method value returned: %d", method);
+  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                 "request method value from request: %d", r->method);
+
+  if (method == NGX_HTTP_UNKNOWN)
+    {
+      ngx_int_t result = ngx_http_named_location (r, &lmcf->fallback);
+      ngx_http_finalize_request (r, NGX_DONE);
+      return result;
+    }
+
+  return NGX_OK;
 }
 
 static void *
@@ -110,12 +123,6 @@ ngx_http_limit_method_create_loc_conf (ngx_conf_t * cf)
   conf->methods     = NGX_CONF_UNSET_PTR;
   conf->method_hash = NGX_CONF_UNSET_PTR;
   conf->enabled     = NGX_CONF_UNSET;
-
-  ngx_log_debug0(NGX_LOG_DEBUG_HTTP, cf->log, 0, "Created conf.");
-  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cf->log, 0, "enabled: %d", conf->enabled);
-  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cf->log, 0, "methods: %x", conf->methods);
-  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cf->log, 0, "fallback: %x", conf->fallback);
-  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cf->log, 0, "methods_hash: %x", conf->method_hash);
 
   return conf;
 }

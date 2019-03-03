@@ -8,7 +8,7 @@ include(ExternalProject)
 include_directories(/usr/local/include)
 include_directories(include)
 
-add_library(limit_method_nginx_module src/ngx_http_limit_method_module.c include/ngx_http_limit_method_module.h src/ngx_http_request_method_hash.c include/ngx_http_request_method_hash.h)
+add_library(limit_method_nginx_module src/ngx_http_limit_method_module.c include/ngx_http_limit_method_module.h src/ngx_http_request_method_hash.c include/ngx_http_request_method_hash.h src/ngx_request_method_set.c include/ngx_request_method_set.h)
 
 ## Documentation.
 # Require dot, treat the other components as optional

@@ -3,10 +3,73 @@ project(limit_method_nginx_module C)
 
 set(CMAKE_C_STANDARD 99)
 
-include_directories(
-    ${PROJECT_SOURCE_DIR}/../nginx/src/core
-    ${PROJECT_SOURCE_DIR}/../nginx/src/http
-    ${PROJECT_SOURCE_DIR}/../nginx/src/os/unix
-)
-add_library(limit_method_nginx_module src/limit_method_nginx_module.c src/limit_method_nginx_module.h)
+include(GNUInstallDirs)
+include(ExternalProject)
+
+add_library(limit_method_nginx_module src/limit_method_nginx_module.c src/limit_method_nginx_module.h src/ngx_http_request_method_hash.c src/ngx_http_request_method_hash.h)
+
+## Documentation.
+# Require dot, treat the other components as optional
+find_package(Doxygen
+    REQUIRED dot
+    OPTIONAL_COMPONENTS mscgen dia)
+
+if (DOXYGEN_FOUND)
+  set(DOXYGEN_GENERATE_HTML YES)
+  set(DOXYGEN_GENERATE_MAN YES)
+  set(DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)
+  set(DOXYGEN_QT_AUTOBRIEF YES)
+  set(DOXYGEN_EXTRACT_ALL YES)
+  set(DOXYGEN_EXCLUDE_PATTERNS */cmake-* */cmake-*/*)
+  set(DOXYGEN_QUIET YES)
+
+  doxygen_add_docs(
+      docs
+      ${PROJECT_SOURCE_DIR}
+      COMMENT "Building documentation using doxygen."
+  )
+
+else (DOXYGEN_FOUND)
+  message("Doxygen needs to be installed to generate the doxygen documentation")
+endif (DOXYGEN_FOUND)
+
+# Make this better.
+# Add ExternalProject for pcre which is also required by nginx.
+find_package(Hg)
+find_package(OpenSSL)
+find_package(ZLIB)
+
+if (HG_FOUND AND OPENSSL_FOUND AND ZLIB_FOUND)
+  ExternalProject_Add(nginx
+      PREFIX ${PROJECT_SOURCE_DIR}/extern
+      HG_REPOSITORY http://hg.nginx.org/nginx/
+      HG_TAG release-1.15.9
+      UPDATE_COMMAND hg pull
+      COMMENT "Building nginx"
+      CONFIGURE_COMMAND cd ${PROJECT_SOURCE_DIR}/extern/src/nginx/ && ./auto/configure --with-debug --prefix=./dist
+      BUILD_IN_SOURCE YES
+      BUILD_COMMAND cd ${PROJECT_SOURCE_DIR}/extern/src/nginx/ && make
+      INSTALL_COMMAND ""
+      )
+
+  ExternalProject_Get_Property(nginx source_dir)
+  include_directories(${source_dir}/src/http)
+  include_directories(${source_dir}/objs)
+  include_directories(${source_dir}/src/http/modules)
+  include_directories(${source_dir}/src/event/modules)
+  include_directories(${source_dir}/src/os/unix)
+  include_directories(${source_dir}/src/core)
+  include_directories(${source_dir}/src/event)
+
+#  add_library(nginx STATIC IMPORTED)
+#  set_property(TARGET nginx PROPERTY IMPORTED_LOCATION ${source_dir}/src)
+#  add_dependencies(nginx project_nginx)
+#
+#  target_link_libraries(limit_method_nginx_module nginx)
+
+else (HG_FOUND AND OPENSSL_FOUND AND ZLIB_FOUND)
+  message("Mercurial required for installing external project nginx.")
+  message("OpenSSL required for installing external project nginx.")
+  message("Zlib required for installing external project nginx.")
+endif (HG_FOUND AND OPENSSL_FOUND AND ZLIB_FOUND)
 

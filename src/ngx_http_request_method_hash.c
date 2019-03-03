@@ -24,11 +24,11 @@ static const ngx_str_t patch     = ngx_string("PATCH");
 static const ngx_str_t trace     = ngx_string("TRACE");
 
 static ngx_hash_keys_arrays_t * init_request_method_keys (ngx_conf_t * cf);
-static ngx_int_t get_request_method_number (ngx_str_t * method);
+static ngx_int_t get_request_method_number (ngx_str_t method);
 static ngx_hash_keys_arrays_t * create_request_method_keys (ngx_array_t methods, ngx_conf_t * cf);
 
 extern ngx_hash_t *
-ngx_http_request_method_create_hash (ngx_conf_t *cf, ngx_array_t methods)
+ngx_http_request_method_create_hash (ngx_conf_t * cf, const ngx_array_t methods)
 {
   ngx_hash_t * method_hash = (ngx_hash_t *) ngx_palloc (cf->pool, sizeof *method_hash);
 
@@ -36,7 +36,7 @@ ngx_http_request_method_create_hash (ngx_conf_t *cf, ngx_array_t methods)
   ngx_hash_init_t hash;
   hash.hash        = method_hash;
   hash.key         = ngx_hash_key;
-  hash.max_size    = methods.nelts;
+  hash.max_size    = methods.nelts + 5;
   hash.bucket_size = ngx_align(64, ngx_cacheline_size);
   hash.name        = "method_hash";
   hash.pool        = cf->pool;
@@ -52,10 +52,10 @@ ngx_http_request_method_create_hash (ngx_conf_t *cf, ngx_array_t methods)
 }
 
 static ngx_hash_keys_arrays_t *
-init_request_method_keys (ngx_conf_t *cf)
+init_request_method_keys (ngx_conf_t * cf)
 {
   // Create method_keys array.
-  ngx_hash_keys_arrays_t *method_keys = ngx_palloc (cf->pool, sizeof *method_keys);
+  ngx_hash_keys_arrays_t * method_keys = ngx_palloc (cf->pool, sizeof *method_keys);
   method_keys->pool      = cf->pool;
   method_keys->temp_pool = cf->temp_pool;
 
@@ -65,52 +65,52 @@ init_request_method_keys (ngx_conf_t *cf)
 }
 
 static ngx_int_t
-get_request_method_number (ngx_str_t *method)
+get_request_method_number (const ngx_str_t method)
 {
-  if (ngx_strcasecmp (get.data, method->data) == 0)
+  if (ngx_strcasecmp (get.data, method.data) == 0)
     return NGX_HTTP_GET;
-  else if (ngx_strcasecmp (head.data, method->data) == 0)
+  else if (ngx_strcasecmp (head.data, method.data) == 0)
     return NGX_HTTP_HEAD;
-  else if (ngx_strcasecmp (post.data, method->data) == 0)
+  else if (ngx_strcasecmp (post.data, method.data) == 0)
     return NGX_HTTP_POST;
-  else if (ngx_strcasecmp (put.data, method->data) == 0)
+  else if (ngx_strcasecmp (put.data, method.data) == 0)
     return NGX_HTTP_PUT;
-  else if (ngx_strcasecmp (delete.data, method->data) == 0)
+  else if (ngx_strcasecmp (delete.data, method.data) == 0)
     return NGX_HTTP_DELETE;
-  else if (ngx_strcasecmp (mkcol.data, method->data) == 0)
+  else if (ngx_strcasecmp (mkcol.data, method.data) == 0)
     return NGX_HTTP_MKCOL;
-  else if (ngx_strcasecmp (copy.data, method->data) == 0)
+  else if (ngx_strcasecmp (copy.data, method.data) == 0)
     return NGX_HTTP_COPY;
-  else if (ngx_strcasecmp (move.data, method->data) == 0)
+  else if (ngx_strcasecmp (move.data, method.data) == 0)
     return NGX_HTTP_MOVE;
-  else if (ngx_strcasecmp (options.data, method->data) == 0)
+  else if (ngx_strcasecmp (options.data, method.data) == 0)
     return NGX_HTTP_OPTIONS;
-  else if (ngx_strcasecmp (propfind.data, method->data) == 0)
+  else if (ngx_strcasecmp (propfind.data, method.data) == 0)
     return NGX_HTTP_PROPFIND;
-  else if (ngx_strcasecmp (proppatch.data, method->data) == 0)
+  else if (ngx_strcasecmp (proppatch.data, method.data) == 0)
     return NGX_HTTP_PROPPATCH;
-  else if (ngx_strcasecmp (lock.data, method->data) == 0)
+  else if (ngx_strcasecmp (lock.data, method.data) == 0)
     return NGX_HTTP_LOCK;
-  else if (ngx_strcasecmp (unlock.data, method->data) == 0)
+  else if (ngx_strcasecmp (unlock.data, method.data) == 0)
     return NGX_HTTP_UNLOCK;
-  else if (ngx_strcasecmp (patch.data, method->data) == 0)
+  else if (ngx_strcasecmp (patch.data, method.data) == 0)
     return NGX_HTTP_PATCH;
-  else if (ngx_strcasecmp (trace.data, method->data) == 0)
+  else if (ngx_strcasecmp (trace.data, method.data) == 0)
     return NGX_HTTP_TRACE;
   else
     return NGX_HTTP_UNKNOWN;
 }
 
 static ngx_hash_keys_arrays_t *
-create_request_method_keys (ngx_array_t methods, ngx_conf_t *cf)
+create_request_method_keys (ngx_array_t methods, ngx_conf_t * cf)
 {
-  ngx_hash_keys_arrays_t *method_keys = init_request_method_keys (cf);
+  ngx_hash_keys_arrays_t * method_keys = init_request_method_keys (cf);
 
   ngx_uint_t i;
   for (i = 0; i < methods.nelts; i++)
     {
-      ngx_str_t *method = (ngx_str_t *) methods.elts + i;
-      ngx_int_t method_number = get_request_method_number (method);
+      ngx_str_t * method = (ngx_str_t *) methods.elts + i;
+      ngx_int_t method_number = get_request_method_number (*method);
 
       if (method_number == NGX_HTTP_UNKNOWN)
         continue;

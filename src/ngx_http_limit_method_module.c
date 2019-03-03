@@ -13,15 +13,15 @@
 
 typedef struct {
   ngx_flag_t enabled;
-  ngx_str_t fallback;
+  ngx_str_t  fallback;
   ngx_array_t * methods;
-  ngx_hash_t * method_hash;
+  ngx_hash_t  * method_hash;
 } ngx_http_limit_method_loc_conf_t;
 
-static ngx_int_t ngx_http_limit_method_handler (ngx_http_request_t *r);
-static void *ngx_http_limit_method_create_loc_conf (ngx_conf_t *cf);
-static char *ngx_http_limit_method_merge_loc_conf (ngx_conf_t *cf, void *parent, void *child);
-static ngx_int_t ngx_http_limit_method_init (ngx_conf_t *cf);
+static ngx_int_t ngx_http_limit_method_handler (ngx_http_request_t * r);
+static void * ngx_http_limit_method_create_loc_conf (ngx_conf_t * cf);
+static char * ngx_http_limit_method_merge_loc_conf (ngx_conf_t * cf, void * parent, void * child);
+static ngx_int_t ngx_http_limit_method_init (ngx_conf_t * cf);
 
 static ngx_command_t ngx_http_limit_method_commands[] = {
     {ngx_string("limit_method"),
@@ -79,9 +79,9 @@ ngx_module_t ngx_http_limit_method_module = {
 };
 
 static ngx_int_t
-ngx_http_limit_method_handler (ngx_http_request_t *r)
+ngx_http_limit_method_handler (ngx_http_request_t * r)
 {
-  ngx_http_limit_method_loc_conf_t *lmcf;
+  ngx_http_limit_method_loc_conf_t * lmcf;
   lmcf = ngx_http_get_module_loc_conf(r, ngx_http_limit_method_module);
 
   if (lmcf->enabled == 0)
@@ -97,9 +97,9 @@ ngx_http_limit_method_handler (ngx_http_request_t *r)
 }
 
 static void *
-ngx_http_limit_method_create_loc_conf (ngx_conf_t *cf)
+ngx_http_limit_method_create_loc_conf (ngx_conf_t * cf)
 {
-  ngx_http_limit_method_loc_conf_t *conf;
+  ngx_http_limit_method_loc_conf_t * conf;
 
   conf = ngx_pcalloc (cf->pool, sizeof (ngx_http_limit_method_loc_conf_t));
   if (conf == NULL)
@@ -107,9 +107,9 @@ ngx_http_limit_method_create_loc_conf (ngx_conf_t *cf)
       return NGX_CONF_ERROR;
     }
 
-  conf->methods = NGX_CONF_UNSET_PTR;
+  conf->methods     = NGX_CONF_UNSET_PTR;
   conf->method_hash = NGX_CONF_UNSET_PTR;
-  conf->enabled = NGX_CONF_UNSET;
+  conf->enabled     = NGX_CONF_UNSET;
 
   ngx_log_debug0(NGX_LOG_DEBUG_HTTP, cf->log, 0, "Created conf.");
   ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cf->log, 0, "enabled: %d", conf->enabled);
@@ -121,10 +121,10 @@ ngx_http_limit_method_create_loc_conf (ngx_conf_t *cf)
 }
 
 static char *
-ngx_http_limit_method_merge_loc_conf (ngx_conf_t *cf, void *parent, void *child)
+ngx_http_limit_method_merge_loc_conf (ngx_conf_t * cf, void * parent, void * child)
 {
-  ngx_http_limit_method_loc_conf_t *prev = parent;
-  ngx_http_limit_method_loc_conf_t *conf = child;
+  ngx_http_limit_method_loc_conf_t * prev = parent;
+  ngx_http_limit_method_loc_conf_t * conf = child;
 
   ngx_array_t * default_methods = ngx_array_create (cf->pool, 10, sizeof (ngx_str_t));
   ngx_array_init (default_methods, cf->pool, 10, sizeof (ngx_str_t));
@@ -139,10 +139,10 @@ ngx_http_limit_method_merge_loc_conf (ngx_conf_t *cf, void *parent, void *child)
 }
 
 static ngx_int_t
-ngx_http_limit_method_init (ngx_conf_t *cf)
+ngx_http_limit_method_init (ngx_conf_t * cf)
 {
-  ngx_http_handler_pt *h;
-  ngx_http_core_main_conf_t *cmcf;
+  ngx_http_handler_pt       * h;
+  ngx_http_core_main_conf_t * cmcf;
 
   cmcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_core_module);
 

@@ -5,8 +5,10 @@ set(CMAKE_C_STANDARD 99)
 
 include(GNUInstallDirs)
 include(ExternalProject)
+include_directories(/usr/local/include)
+include_directories(include)
 
-add_library(limit_method_nginx_module src/limit_method_nginx_module.c src/limit_method_nginx_module.h src/ngx_http_request_method_hash.c src/ngx_http_request_method_hash.h)
+add_library(limit_method_nginx_module src/ngx_http_limit_method_module.c include/ngx_http_limit_method_module.h src/ngx_http_request_method_hash.c include/ngx_http_request_method_hash.h)
 
 ## Documentation.
 # Require dot, treat the other components as optional
@@ -36,20 +38,20 @@ endif (DOXYGEN_FOUND)
 # Make this better.
 # Add ExternalProject for pcre which is also required by nginx.
 find_package(Hg)
-find_package(OpenSSL)
-find_package(ZLIB)
+#find_package(OpenSSL)
+#find_package(ZLIB)
 
-if (HG_FOUND AND OPENSSL_FOUND AND ZLIB_FOUND)
+if (HG_FOUND)
   ExternalProject_Add(nginx
       PREFIX ${PROJECT_SOURCE_DIR}/extern
       HG_REPOSITORY http://hg.nginx.org/nginx/
       HG_TAG release-1.15.9
       UPDATE_COMMAND hg pull
       COMMENT "Building nginx"
-      CONFIGURE_COMMAND cd ${PROJECT_SOURCE_DIR}/extern/src/nginx/ && ./auto/configure --with-debug --prefix=./dist
+      CONFIGURE_COMMAND cd ${PROJECT_SOURCE_DIR}/extern/src/nginx/ && ./auto/configure --with-debug --prefix=./dist --add-module=${PROJECT_SOURCE_DIR}/src
       BUILD_IN_SOURCE YES
       BUILD_COMMAND cd ${PROJECT_SOURCE_DIR}/extern/src/nginx/ && make
-      INSTALL_COMMAND ""
+      INSTALL_COMMAND cd ${PROJECT_SOURCE_DIR}/extern/src/nginx/ && make install
       )
 
   ExternalProject_Get_Property(nginx source_dir)
@@ -61,15 +63,9 @@ if (HG_FOUND AND OPENSSL_FOUND AND ZLIB_FOUND)
   include_directories(${source_dir}/src/core)
   include_directories(${source_dir}/src/event)
 
-#  add_library(nginx STATIC IMPORTED)
-#  set_property(TARGET nginx PROPERTY IMPORTED_LOCATION ${source_dir}/src)
-#  add_dependencies(nginx project_nginx)
-#
-#  target_link_libraries(limit_method_nginx_module nginx)
-
-else (HG_FOUND AND OPENSSL_FOUND AND ZLIB_FOUND)
+else (HG_FOUND)
   message("Mercurial required for installing external project nginx.")
-  message("OpenSSL required for installing external project nginx.")
-  message("Zlib required for installing external project nginx.")
-endif (HG_FOUND AND OPENSSL_FOUND AND ZLIB_FOUND)
+#  message("OpenSSL required for installing external project nginx.")
+#  message("Zlib required for installing external project nginx.")
+endif (HG_FOUND)
 

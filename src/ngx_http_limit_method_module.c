@@ -8,14 +8,14 @@
 #include <ngx_core.h>
 #include <ngx_http.h>
 #include <stddef.h>
-#include "limit_method_nginx_module.h"
+#include "ngx_http_limit_method_module.h"
 #include "ngx_http_request_method_hash.h"
 
 typedef struct {
-  ngx_str_t fallback;
-  ngx_array_t methods;
   ngx_flag_t enabled;
-  ngx_hash_t method_hash;
+  ngx_str_t fallback;
+  ngx_array_t * methods;
+  ngx_hash_t * method_hash;
 } ngx_http_limit_method_loc_conf_t;
 
 static ngx_int_t ngx_http_limit_method_handler (ngx_http_request_t *r);
@@ -32,7 +32,7 @@ static ngx_command_t ngx_http_limit_method_commands[] = {
      NULL
     },
     {ngx_string("limit_method_allowed_methods"),
-     NGX_HTTP_LOC_CONF | NGX_CONF_ANY,
+     NGX_HTTP_LOC_CONF | NGX_CONF_1MORE,
      ngx_conf_set_str_array_slot,
      NGX_HTTP_LOC_CONF_OFFSET,
      offsetof (ngx_http_limit_method_loc_conf_t, methods),
@@ -104,12 +104,18 @@ ngx_http_limit_method_create_loc_conf (ngx_conf_t *cf)
   conf = ngx_pcalloc (cf->pool, sizeof (ngx_http_limit_method_loc_conf_t));
   if (conf == NULL)
     {
-      return NULL;
+      return NGX_CONF_ERROR;
     }
 
-  /*
-   * ngx_http_limit_method_loc_conf_t initialized by ngx_pcalloc().
-   */
+  conf->methods = NGX_CONF_UNSET_PTR;
+  conf->method_hash = NGX_CONF_UNSET_PTR;
+  conf->enabled = NGX_CONF_UNSET;
+
+  ngx_log_debug0(NGX_LOG_DEBUG_HTTP, cf->log, 0, "Created conf.");
+  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cf->log, 0, "enabled: %d", conf->enabled);
+  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cf->log, 0, "methods: %x", conf->methods);
+  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cf->log, 0, "fallback: %x", conf->fallback);
+  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, cf->log, 0, "methods_hash: %x", conf->method_hash);
 
   return conf;
 }
@@ -120,20 +126,14 @@ ngx_http_limit_method_merge_loc_conf (ngx_conf_t *cf, void *parent, void *child)
   ngx_http_limit_method_loc_conf_t *prev = parent;
   ngx_http_limit_method_loc_conf_t *conf = child;
 
-  if (conf->methods.nelts == 0 && prev->methods.nelts == 0)
-    {
-      conf->methods = *ngx_array_create (cf->pool, 10, sizeof (ngx_str_t));
-      ngx_array_init (&(conf->methods), cf->pool, 10, sizeof (ngx_str_t));
-    }
-  else if (conf->methods.nelts == 0)
-    {
-      conf->methods = prev->methods;
-    }
+  ngx_array_t * default_methods = ngx_array_create (cf->pool, 10, sizeof (ngx_str_t));
+  ngx_array_init (default_methods, cf->pool, 10, sizeof (ngx_str_t));
 
   ngx_conf_merge_value(conf->enabled, prev->enabled, 0);
   ngx_conf_merge_str_value(conf->fallback, prev->fallback, "");
+  ngx_conf_merge_ptr_value(conf->methods, prev->methods, default_methods);
 
-  conf->method_hash = * ngx_http_request_method_create_hash (cf, conf->methods);
+  conf->method_hash = ngx_http_request_method_create_hash (cf, *conf->methods);
 
   return NGX_CONF_OK;
 }

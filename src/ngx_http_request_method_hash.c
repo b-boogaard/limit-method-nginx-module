@@ -106,7 +106,7 @@ create_request_method_keys (ngx_array_t methods, ngx_conf_t *cf)
 {
   ngx_hash_keys_arrays_t *method_keys = init_request_method_keys (cf);
 
-  int i;
+  ngx_uint_t i;
   for (i = 0; i < methods.nelts; i++)
     {
       ngx_str_t *method = (ngx_str_t *) methods.elts + i;

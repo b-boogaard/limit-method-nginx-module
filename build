@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+BUILD_DIR=cmake-build-debug
+
+mkdir -p ${BUILD_DIR} \
+    && cd ${BUILD_DIR} \
+    && cmake .. \
+    && make \
+    && cd .. \
+    && echo "Done."

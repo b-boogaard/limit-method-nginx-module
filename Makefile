@@ -1,11 +1,4 @@
-.PHONY: all clean build
+.PHONY: build run-local
 
-all : clean build
-
-clean:
-	rm -rf target
-
-build:
-	mkdir -p target
-	cd target
-	cmake ..
+run-local:
+	@echo ./build/sbin/nginx

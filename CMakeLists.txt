@@ -42,17 +42,26 @@ find_package(Hg)
 #find_package(ZLIB)
 
 if (HG_FOUND)
+  set (NGINX_BUILD_DIR ${PROJECT_SOURCE_DIR}/nginx-build)
+  set (NGINX_EXTERN_DIR ${PROJECT_SOURCE_DIR}/extern/src/nginx)
+
   ExternalProject_Add(nginx
       PREFIX ${PROJECT_SOURCE_DIR}/extern
       HG_REPOSITORY http://hg.nginx.org/nginx/
       HG_TAG release-1.15.9
       UPDATE_COMMAND hg pull
       COMMENT "Building nginx"
-      CONFIGURE_COMMAND cd ${PROJECT_SOURCE_DIR}/extern/src/nginx/ && ./auto/configure --with-debug --prefix=./dist --add-module=${PROJECT_SOURCE_DIR}/src
+      CONFIGURE_COMMAND cd ${NGINX_EXTERN_DIR} && ./auto/configure --with-debug --prefix=${NGINX_BUILD_DIR} --add-module=${PROJECT_SOURCE_DIR}
       BUILD_IN_SOURCE YES
-      BUILD_COMMAND cd ${PROJECT_SOURCE_DIR}/extern/src/nginx/ && make
-      INSTALL_COMMAND cd ${PROJECT_SOURCE_DIR}/extern/src/nginx/ && make install
-      )
+      BUILD_COMMAND cd ${NGINX_EXTERN_DIR} && make
+      INSTALL_COMMAND cd ${NGINX_EXTERN_DIR} && make install
+  )
+
+  configure_file(
+      ${PROJECT_SOURCE_DIR}/templates/nginx.conf
+      ${NGINX_BUILD_DIR}/conf/nginx.conf
+      COPYONLY
+  )
 
   ExternalProject_Get_Property(nginx source_dir)
   include_directories(${source_dir}/src/http)

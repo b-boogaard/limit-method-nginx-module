@@ -1,4 +1,5 @@
-cmake*/**
-/cmake*/**
-/build
 /extern/**/*
+.idea/
+cmake-build-debug/
+extern/
+nginx-build/

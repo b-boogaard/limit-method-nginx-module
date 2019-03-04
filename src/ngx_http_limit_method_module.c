@@ -8,14 +8,15 @@
 #include <ngx_core.h>
 #include <ngx_http.h>
 #include <stddef.h>
+#include <string.h>
 #include "ngx_http_limit_method_module.h"
-#include "ngx_http_request_method_hash.h"
+#include "ngx_http_request_method.h"
 
 typedef struct {
   ngx_flag_t enabled;
   ngx_str_t  fallback;
-  ngx_array_t * methods;
-  ngx_hash_t  * method_hash;
+  ngx_array_t * method_names;
+  ngx_array_t * method_numbers;
 } ngx_http_limit_method_loc_conf_t;
 
 static ngx_int_t ngx_http_limit_method_handler (ngx_http_request_t * r);
@@ -35,7 +36,7 @@ static ngx_command_t ngx_http_limit_method_commands[] = {
      NGX_HTTP_LOC_CONF | NGX_CONF_1MORE,
      ngx_conf_set_str_array_slot,
      NGX_HTTP_LOC_CONF_OFFSET,
-     offsetof (ngx_http_limit_method_loc_conf_t, methods),
+     offsetof (ngx_http_limit_method_loc_conf_t, method_names),
      NULL
     },
     {ngx_string("limit_method_fallback"),
@@ -82,31 +83,25 @@ static ngx_int_t
 ngx_http_limit_method_handler (ngx_http_request_t * r)
 {
   ngx_http_limit_method_loc_conf_t * lmcf;
-  lmcf = ngx_http_get_module_loc_conf(r, ngx_http_limit_method_module);
+  lmcf = ngx_http_get_module_loc_conf (r, ngx_http_limit_method_module);
 
   if (lmcf->enabled == 0)
     {
       return NGX_DECLINED;
     }
 
-  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                 "request method name: %s", r->method_name.data);
+  ngx_int_t is_allowed = ngx_http_request_method_contains_number (*lmcf->method_numbers, r->method);
 
-  ngx_int_t method = ngx_http_request_method_get_value (*lmcf->method_hash, r->method_name);
-
-  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                 "request method value returned: %d", method);
-  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                 "request method value from request: %d", r->method);
-
-  if (method == NGX_HTTP_UNKNOWN)
+  // method isn't allowed for this location; do internal redirect to fallback.
+  if (is_allowed == 0)
     {
       ngx_int_t result = ngx_http_named_location (r, &lmcf->fallback);
       ngx_http_finalize_request (r, NGX_DONE);
+
       return result;
     }
 
-  return NGX_OK;
+  return NGX_DECLINED;
 }
 
 static void *
@@ -120,9 +115,9 @@ ngx_http_limit_method_create_loc_conf (ngx_conf_t * cf)
       return NGX_CONF_ERROR;
     }
 
-  conf->methods     = NGX_CONF_UNSET_PTR;
-  conf->method_hash = NGX_CONF_UNSET_PTR;
-  conf->enabled     = NGX_CONF_UNSET;
+  conf->method_names   = NGX_CONF_UNSET_PTR;
+  conf->method_numbers = NGX_CONF_UNSET_PTR;
+  conf->enabled        = NGX_CONF_UNSET;
 
   return conf;
 }
@@ -138,9 +133,14 @@ ngx_http_limit_method_merge_loc_conf (ngx_conf_t * cf, void * parent, void * chi
 
   ngx_conf_merge_value(conf->enabled, prev->enabled, 0);
   ngx_conf_merge_str_value(conf->fallback, prev->fallback, "");
-  ngx_conf_merge_ptr_value(conf->methods, prev->methods, default_methods);
+  ngx_conf_merge_ptr_value(conf->method_names, prev->method_names, default_methods);
 
-  conf->method_hash = ngx_http_request_method_create_hash (cf, *conf->methods);
+  conf->method_numbers = ngx_http_request_method_names_to_numbers (cf, *conf->method_names);
+
+  if (conf->method_numbers == NULL)
+    {
+      return NGX_CONF_ERROR;
+    }
 
   return NGX_CONF_OK;
 }

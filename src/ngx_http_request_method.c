@@ -5,7 +5,8 @@
  */
 
 #include <ngx_http.h>
-#include "ngx_http_request_method_hash.h"
+#include <stdio.h>
+#include "ngx_http_request_method.h"
 
 static const ngx_str_t get       = ngx_string("GET");
 static const ngx_str_t head      = ngx_string("HEAD");
@@ -23,63 +24,50 @@ static const ngx_str_t unlock    = ngx_string("UNLOCK");
 static const ngx_str_t patch     = ngx_string("PATCH");
 static const ngx_str_t trace     = ngx_string("TRACE");
 
-static ngx_hash_keys_arrays_t * init_request_method_keys (ngx_conf_t * cf);
-static ngx_int_t get_request_method_number (ngx_str_t method);
-static ngx_hash_keys_arrays_t * create_request_method_keys (ngx_array_t methods, ngx_conf_t * cf);
-
-extern ngx_hash_t *
-ngx_http_request_method_create_hash (ngx_conf_t * cf, const ngx_array_t methods)
-{
-  ngx_hash_t * method_hash = (ngx_hash_t *) ngx_palloc (cf->pool, sizeof *method_hash);
-
-  // Setup init hash.
-  ngx_hash_init_t hash;
-  hash.hash        = method_hash;
-  hash.key         = ngx_hash_key;
-  hash.max_size    = methods.nelts + 5;
-  hash.bucket_size = ngx_align(64, ngx_cacheline_size);
-  hash.name        = "method_hash";
-  hash.pool        = cf->pool;
-  hash.temp_pool   = cf->temp_pool;
-
-
-  // Create keys.
-  ngx_hash_keys_arrays_t * method_keys = create_request_method_keys (methods, cf);
-
-  ngx_hash_init (&hash, method_keys->keys.elts, method_keys->keys.nelts);
-
-  return method_hash;
-}
+static ngx_uint_t request_method_get_number (ngx_str_t method);
 
 extern ngx_int_t
-ngx_http_request_method_get_value (ngx_hash_t hash, ngx_str_t key_value)
+ngx_http_request_method_contains_number (ngx_array_t method_numbers, ngx_uint_t method_number)
 {
-  ngx_uint_t key = ngx_hash_key (key_value.data, key_value.len);
-  ngx_int_t * value = (ngx_int_t *) ngx_hash_find (&hash, key, key_value.data, key_value.len);
-
-  if (value == NULL)
+  ngx_uint_t i;
+  for (i = 0; i < method_numbers.nelts; i++)
     {
-      return NGX_HTTP_UNKNOWN;
+      ngx_uint_t * current_number_ptr = (ngx_uint_t *) method_numbers.elts + i;
+      if (*current_number_ptr == method_number)
+        {
+          return 1;
+        }
     }
 
-  return *value;
+  return 0;
 }
 
-static ngx_hash_keys_arrays_t *
-init_request_method_keys (ngx_conf_t * cf)
+extern ngx_array_t *
+ngx_http_request_method_names_to_numbers (ngx_conf_t * cf, ngx_array_t method_names)
 {
-  // Create method_keys array.
-  ngx_hash_keys_arrays_t * method_keys = ngx_palloc (cf->pool, sizeof *method_keys);
-  method_keys->pool      = cf->pool;
-  method_keys->temp_pool = cf->temp_pool;
+  ngx_array_t * method_numbers = ngx_array_create (cf->pool, 20, sizeof (ngx_uint_t));
+  ngx_array_init (method_numbers, cf->pool, 20, sizeof (ngx_uint_t));
 
-  ngx_hash_keys_array_init (method_keys, NGX_HASH_SMALL);
+  ngx_uint_t i;
+  for (i = 0; i < method_names.nelts; i++)
+    {
+      ngx_str_t * method_name = (ngx_str_t *) method_names.elts + i;
+      ngx_uint_t method_number = request_method_get_number (*method_name);
 
-  return method_keys;
+      ngx_uint_t * array_ptr = ngx_array_push (method_numbers);
+      if (array_ptr == NULL)
+        {
+          return NULL;
+        }
+
+      *array_ptr = method_number;
+    }
+
+  return method_numbers;
 }
 
-static ngx_int_t
-get_request_method_number (const ngx_str_t method)
+static ngx_uint_t
+request_method_get_number (const ngx_str_t method)
 {
   if (ngx_strcasecmp (get.data, method.data) == 0)
     return NGX_HTTP_GET;
@@ -113,24 +101,4 @@ get_request_method_number (const ngx_str_t method)
     return NGX_HTTP_TRACE;
   else
     return NGX_HTTP_UNKNOWN;
-}
-
-static ngx_hash_keys_arrays_t *
-create_request_method_keys (ngx_array_t methods, ngx_conf_t * cf)
-{
-  ngx_hash_keys_arrays_t * method_keys = init_request_method_keys (cf);
-
-  ngx_uint_t i;
-  for (i = 0; i < methods.nelts; i++)
-    {
-      ngx_str_t * method = (ngx_str_t *) methods.elts + i;
-      ngx_int_t method_number = get_request_method_number (*method);
-
-      if (method_number == NGX_HTTP_UNKNOWN)
-        continue;
-
-      ngx_hash_add_key (method_keys, method, (void *) method_number, NGX_HASH_READONLY_KEY);
-    }
-
-  return method_keys;
 }

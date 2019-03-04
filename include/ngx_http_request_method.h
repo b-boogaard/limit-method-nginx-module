@@ -11,7 +11,10 @@
 #include <ngx_config.h>
 #include <ngx_http.h>
 
-extern ngx_hash_t * ngx_http_request_method_create_hash (ngx_conf_t * cf, ngx_array_t methods);
-extern ngx_int_t ngx_http_request_method_get_value (ngx_hash_t hash, ngx_str_t key_value);
+extern ngx_int_t
+ngx_http_request_method_contains_number (ngx_array_t method_numbers, ngx_uint_t method_number);
+
+extern ngx_array_t *
+ngx_http_request_method_names_to_numbers (ngx_conf_t * cf, ngx_array_t method_names);
 
 #endif //LIMIT_METHOD_NGINX_MODULE_NGX_HTTP_REQUEST_METHOD_HASH_H

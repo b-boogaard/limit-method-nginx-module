@@ -1,11 +1,13 @@
+#!/usr/bin/env bash
+
 ngx_module_type=HTTP
 ngx_module_name=ngx_http_limit_method_module
 ngx_module_srcs=" \
-    ${ngx_addon_dir}/src/ngx_http_request_method_hash.c \
+    ${ngx_addon_dir}/src/ngx_http_request_method.c \
     ${ngx_addon_dir}/src/ngx_http_limit_method_module.c \
     "
 ngx_module_deps=" \
-    ${ngx_addon_dir}/include/ngx_http_request_method_hash.h \
+    ${ngx_addon_dir}/include/ngx_http_request_method.h \
     ${ngx_addon_dir}/include/ngx_http_limit_method_module.h \
     "
 

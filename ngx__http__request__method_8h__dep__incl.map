@@ -1,0 +1,5 @@
+<map id="include/ngx_http_request_method.h" name="include/ngx_http_request_method.h">
+<area shape="rect" id="node1" title="Public interface for ngx_http_request_method." alt="" coords="69,5,239,44"/>
+<area shape="rect" id="node2" href="$ngx__http__limit__method__module_8c.html" title="Nginx module that allows limiting locations by request method with a fallback." alt="" coords="5,92,140,131"/>
+<area shape="rect" id="node3" href="$ngx__http__request__method_8c.html" title="Manages configured request methods for ngx_http_limit_method_module." alt="" coords="164,92,310,131"/>
+</map>

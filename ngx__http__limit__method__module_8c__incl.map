@@ -1,0 +1,10 @@
+<map id="src/ngx_http_limit_method_module.c" name="src/ngx_http_limit_method_module.c">
+<area shape="rect" id="node1" title="Nginx module that allows limiting locations by request method with a fallback." alt="" coords="266,5,401,44"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,179,102,204"/>
+<area shape="rect" id="node3" title=" " alt="" coords="142,179,229,204"/>
+<area shape="rect" id="node4" title=" " alt="" coords="272,179,356,204"/>
+<area shape="rect" id="node5" title=" " alt="" coords="371,99,440,124"/>
+<area shape="rect" id="node6" title=" " alt="" coords="464,99,529,124"/>
+<area shape="rect" id="node7" href="$ngx__http__limit__method__module_8h.html" title="Empty header file." alt="" coords="553,92,709,131"/>
+<area shape="rect" id="node8" href="$ngx__http__request__method_8h.html" title="Public interface for ngx_http_request_method." alt="" coords="109,99,297,124"/>
+</map>

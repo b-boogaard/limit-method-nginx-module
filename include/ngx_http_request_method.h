@@ -1,5 +1,7 @@
 /*!
- * \file ngx_http_request_method_hash.h
+ * \file ngx_http_request_method.h
+ * \brief Public interface for ngx_http_request_method.
+ *
  * \author Brian van de Boogaard (b-boogaard)
  * \copyright Copyright (c) 2019 Brian van de Boogaard (b-boogaard). All rights reserved.
  */

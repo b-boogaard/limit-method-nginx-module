@@ -1,5 +1,7 @@
 /*!
- * \file limit_method_nginx_module.c
+ * \file ngx_http_limit_method_module.c
+ * \brief Nginx module that allows limiting locations by request method with a fallback.
+ *
  * \author Brian van de Boogaard (b-boogaard)
  * \copyright Copyright (c) 2019 Brian van de Boogaard (b-boogaard). All rights reserved.
  */

@@ -1,5 +1,7 @@
 /*!
- * \file ngx_http_request_method_hash.c
+ * \file ngx_http_request_method.c
+ * \brief Manages configured request methods for ngx_http_limit_method_module.
+ *
  * \author Brian van de Boogaard (b-boogaard)
  * \copyright Copyright (c) 2019 Brian van de Boogaard (b-boogaard). All rights reserved.
  */

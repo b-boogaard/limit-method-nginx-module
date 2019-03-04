@@ -22,7 +22,7 @@ if (DOXYGEN_FOUND)
   set(DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)
   set(DOXYGEN_QT_AUTOBRIEF YES)
   set(DOXYGEN_EXTRACT_ALL YES)
-  set(DOXYGEN_EXCLUDE_PATTERNS */cmake-* */cmake-*/*)
+  set(DOXYGEN_EXCLUDE_PATTERNS */cmake-* */cmake-*/* */extern/* */*build*/*)
   set(DOXYGEN_QUIET YES)
 
   doxygen_add_docs(

@@ -1,5 +1,7 @@
 /*!
- * \file limit_method_nginx_module.h
+ * \file ngx_http_limit_method_module.h
+ * \brief Empty header file. For now...
+ *
  * \author Brian van de Boogaard (b-boogaard)
  * \copyright Copyright (c) 2019 Brian van de Boogaard (b-boogaard). All rights reserved.
  */

@@ -1,8 +1,8 @@
 <map id="src/ngx_http_request_method.c" name="src/ngx_http_request_method.c">
-<area shape="rect" id="node1" title="Manages configured request methods for ngx_http_limit_method_module." alt="" coords="5,5,151,44"/>
-<area shape="rect" id="node2" title=" " alt="" coords="22,165,105,191"/>
-<area shape="rect" id="node3" title=" " alt="" coords="48,92,109,117"/>
-<area shape="rect" id="node4" href="$ngx__http__request__method_8h.html" title="Public interface for ngx_http_request_method." alt="" coords="133,92,320,117"/>
-<area shape="rect" id="node5" title=" " alt="" coords="156,165,243,191"/>
-<area shape="rect" id="node6" title=" " alt="" coords="267,165,364,191"/>
+<area shape="rect" id="node1" title="Manages configured request methods for ngx_http_limit_method_module." alt="" coords="36,5,182,44"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,92,66,117"/>
+<area shape="rect" id="node3" href="$ngx__http__request__method_8h.html" title="Public interface for ngx_http_request_method." alt="" coords="90,92,277,117"/>
+<area shape="rect" id="node4" title=" " alt="" coords="24,165,111,191"/>
+<area shape="rect" id="node5" title=" " alt="" coords="135,165,232,191"/>
+<area shape="rect" id="node6" title=" " alt="" coords="257,165,340,191"/>
 </map>

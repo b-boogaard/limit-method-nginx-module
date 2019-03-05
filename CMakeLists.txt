@@ -24,6 +24,8 @@ if (DOXYGEN_FOUND)
   set(DOXYGEN_EXTRACT_ALL YES)
   set(DOXYGEN_EXCLUDE_PATTERNS */cmake-* */cmake-*/* */extern/* */*build*/*)
   set(DOXYGEN_QUIET YES)
+  set(DOXYGEN_HTML_EXTRA_STYLESHEET ${PROJECT_SOURCE_DIR}/templates/customdoxygen.css)
+  set(DOXYGEN_LAYOUT_FILE ${PROJECT_SOURCE_DIR}/templates/DoxygenLayout.xml)
 
   doxygen_add_docs(
       docs
